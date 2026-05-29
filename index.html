@@ -2003,17 +2003,27 @@ window.toggleCustom = toggleCustom;
 
 // Actualizar desplegables de goleador y mvp cuando cambia el equipo
 function onEquipoChange(bombo, idPrefix) {
-  const eqSel = document.getElementById((idPrefix||'')+'eq'+bombo) || document.getElementById((idPrefix||'')+'eeq'+bombo);
+  const pre = idPrefix||'';
+  // Buscar el select de equipo
+  const eqId = pre==='e' ? 'eeq'+bombo : 'eq'+bombo;
+  const eqSel = document.getElementById(eqId);
   const equipo = eqSel ? eqSel.value : '';
   const jugadores = equipo && JUGADORES[equipo] ? JUGADORES[equipo] : [];
-  ['gol','mvp'].forEach(tipo => {
-    const id = (idPrefix||'') + tipo + bombo;
+  ['gol','mvp'].forEach(function(tipo) {
+    const id = pre + tipo + bombo;
     const sel = document.getElementById(id);
     if(!sel) return;
     const curr = sel.value;
-    sel.innerHTML = `<option value="">— Elige jugador —</option>
-      ${jugadores.map(j=>`<option value="${j}" ${curr===j?'selected':''}>${j}</option>`).join('')}
-      <option value="__otro__" ${curr==='__otro__'?'selected':''}>✏️ Escribir manualmente</option>`;
+    let opts = '<option value="">— Elige jugador —</option>';
+    jugadores.forEach(function(j){
+      opts += '<option value="'+j+'"'+(curr===j?' selected':'')+'>'+j+'</option>';
+    });
+    opts += '<option value="__otro__"'+(curr==='__otro__'?' selected':'')+'>✏️ Escribir manualmente</option>';
+    sel.innerHTML = opts;
+    // Mostrar/ocultar campo manual
+    const customId = id + '_custom';
+    const inp = document.getElementById(customId);
+    if(inp) inp.style.display = 'none';
   });
 }
 window.onEquipoChange = onEquipoChange;
